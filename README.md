@@ -1,0 +1,1 @@
+Spoke-hub-hub-spoke via Azure Firewall or via Windows Server 2016 VMs configured as routers

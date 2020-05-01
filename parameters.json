@@ -1,0 +1,156 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_Hub_1_name": {
+            "value": null
+        },
+        "virtualMachines_Hub_2_name": {
+            "value": null
+        },
+        "routeTables_H1VM_H2VM_name": {
+            "value": null
+        },
+        "routeTables_H2VM_H1VM_name": {
+            "value": null
+        },
+        "routeTables_Hub1_Hub2_name": {
+            "value": null
+        },
+        "routeTables_Hub2_Hub1_name": {
+            "value": null
+        },
+        "virtualNetworks_Hub_1_name": {
+            "value": null
+        },
+        "virtualNetworks_Hub_2_name": {
+            "value": null
+        },
+        "virtualMachines_Spoke_1_name": {
+            "value": null
+        },
+        "virtualMachines_Spoke_3_name": {
+            "value": null
+        },
+        "azureFirewalls_fw_Hub_1_name": {
+            "value": null
+        },
+        "azureFirewalls_fw_Hub_2_name": {
+            "value": null
+        },
+        "routeTables_Spoke3_Hub2_name": {
+            "value": null
+        },
+        "virtualNetworks_Spoke_1_name": {
+            "value": null
+        },
+        "virtualNetworks_Spoke_2_name": {
+            "value": null
+        },
+        "virtualNetworks_Spoke_3_name": {
+            "value": null
+        },
+        "virtualNetworks_Spoke_4_name": {
+            "value": null
+        },
+        "routeTables_Spoke1_to_fw_name": {
+            "value": null
+        },
+        "bastionHosts_Hub_1_bastion_name": {
+            "value": null
+        },
+        "bastionHosts_Hub_2_bastion_name": {
+            "value": null
+        },
+        "networkInterfaces_hub_1855_name": {
+            "value": null
+        },
+        "networkInterfaces_hub_2509_name": {
+            "value": null
+        },
+        "publicIPAddresses_Hub_1_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_Hub_2_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_Hub1ip148_name": {
+            "value": null
+        },
+        "publicIPAddresses_Hub2ip405_name": {
+            "value": null
+        },
+        "publicIPAddresses_Hub2ip964_name": {
+            "value": null
+        },
+        "bastionHosts_Spoke_1_bastion_name": {
+            "value": null
+        },
+        "bastionHosts_Spoke_3_bastion_name": {
+            "value": null
+        },
+        "networkInterfaces_spoke_1875_name": {
+            "value": null
+        },
+        "networkInterfaces_spoke_3960_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke_1_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke_3_ip_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke1ip523_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke3ip250_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke3ip662_name": {
+            "value": null
+        },
+        "publicIPAddresses_Spoke3ip834_name": {
+            "value": null
+        },
+        "firewallPolicies_HubSpokePolicy_name": {
+            "value": null
+        },
+        "networkSecurityGroups_Hub_1_nsg_name": {
+            "value": null
+        },
+        "networkSecurityGroups_Hub_2_nsg_name": {
+            "value": null
+        },
+        "storageAccounts_flowloghubspoke_name": {
+            "value": null
+        },
+        "networkSecurityGroups_Hub2nsg231_name": {
+            "value": null
+        },
+        "storageAccounts_hubspokedemodiag_name": {
+            "value": null
+        },
+        "networkSecurityGroups_Spoke_1_nsg_name": {
+            "value": null
+        },
+        "networkSecurityGroups_Spoke_3_nsg_name": {
+            "value": null
+        },
+        "publicIPAddresses_fw_Hub_1_Pip324_name": {
+            "value": null
+        },
+        "publicIPAddresses_fw_Hub_1_Pip330_name": {
+            "value": null
+        },
+        "publicIPAddresses_fw_Hub_2_Pip324_name": {
+            "value": null
+        },
+        "publicIPAddresses_fw_Hub_2_Pip330_name": {
+            "value": null
+        },
+        "disks_Hub_2_disk1_0a9c93d41c9a4b6ead9ec388f317981a_name": {
+            "value": null
+        }
+    }
+}
