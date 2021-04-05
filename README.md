@@ -1,4 +1,4 @@
-# **Spoke-hub-hub-spoke via Azure Firewall
+# Spoke-hub-hub-spoke via Azure Firewall
 
 Demonstrates VNET-based spoke-hub-hub-spoke routing via Azure Firewall. 
 
