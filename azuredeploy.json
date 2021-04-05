@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminUsername": {
@@ -28,13 +28,16 @@
             }
         },
         "vmsize":{
-        "type":"string",
-        "defaultValue": "Standard_A1_v2",
-        "allowedValues": [
-            "Standard_A1_v2",
-            "Standard_A2_v2",
-            "Standard_A4_v2"
-            ]
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "allowedValues": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2"                
+            ],
+            "metadata": {
+              "description": "Virtual machine size"
+            }
         },
         "virtualMachines_Hub_1_name": {
             "defaultValue": "Hub-1",
@@ -238,13 +241,65 @@
 
         {
             "type": "Microsoft.Network/firewallPolicies",
-            "apiVersion": "2020-03-01",
+            "apiVersion": "2020-08-01",
             "name": "[parameters('firewallPolicies_HubSpokePolicy_name')]",
-            "location": "centralus",
+            "location": "eastus",
             "properties": {
+                "sku": {
+                    "tier": "Standard"
+                },
                 "threatIntelMode": "Alert"
-            }
+            },
+            "resources":[
+				{
+					"apiVersion": "2020-08-01",
+					"type": "ruleCollectionGroups",
+					"name": "PolicyRules",
+					"location": "eastus",
+					"dependsOn": [
+						"[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicies_HubSpokePolicy_name'))]"
+					],
+					"properties": {
+						"priority": 200,
+						"ruleCollections": [
+							{
+								"name": "AllowSpokes",
+								"priority": 300,
+								"ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+								"action": {
+									"type": "Allow"
+								},
+								"rules": [
+
+                                    {
+                                        "ruleType": "NetworkRule",
+                                        "name":"AllowSpokes",
+                                        "destinationPorts": [
+                                            "*"
+                                        ],
+                                        "sourceAddresses": [
+                                            "172.16.0.0/16"
+                                        ],
+                                        "destinationAddresses": [
+                                            "172.16.0.0/16"
+                                        ],
+										"ipProtocols": [
+											"Any"
+										]
+                                    }
+								]
+							}
+						]
+					}
+				}
+
+            ]
         },
+
+
+
+
+
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-03-01",
@@ -989,48 +1044,45 @@
             }
         },
         {
-            "type": "Microsoft.Network/firewallPolicies/ruleGroups",
-            "apiVersion": "2020-03-01",
-            "name": "[concat(parameters('firewallPolicies_HubSpokePolicy_name'), '/DefaultApplicationRuleCollectionGroup')]",
-            "location": "centralus",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachines_Spoke_1_name'), '/IISExtension')]",
+            "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicies_HubSpokePolicy_name'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_Spoke_1_name'))]"
             ],
             "properties": {
-                "priority": 300,
-                "rules": [
-                    {
-                        "ruleType": "FirewallPolicyFilterRule",
-                        "name": "Internet",
-                        "priority": 100
-                    }
-                ]
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "settings":{
+                     "commandToExecute":"powershell -ExecutionPolicy Unrestricted Add-WindowsFeature Web-Server; powershell -ExecutionPolicy Unrestricted Add-Content -Path \"C:\\inetpub\\wwwroot\\Default.htm\" -Value $($env:computername)"
+                },
+                "protectedSettings":{}
             }
         },
         {
-            "type": "Microsoft.Network/firewallPolicies/ruleGroups",
-            "apiVersion": "2020-03-01",
-            "name": "[concat(parameters('firewallPolicies_HubSpokePolicy_name'), '/DefaultNetworkRuleCollectionGroup')]",
-            "location": "centralus",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachines_Spoke_3_name'), '/IISExtension')]",
+            "location": "eastus",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/firewallPolicies', parameters('firewallPolicies_HubSpokePolicy_name'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_Spoke_3_name'))]"
             ],
             "properties": {
-                "priority": 200,
-                "rules": [
-                    {
-                        "ruleType": "FirewallPolicyFilterRule",
-                        "name": "AzureCloud",
-                        "priority": 200
-                    },
-                    {
-                        "ruleType": "FirewallPolicyFilterRule",
-                        "name": "SpokeCollection",
-                        "priority": 100
-                    }
-                ]
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.9",
+                "settings":{
+                     "commandToExecute":"powershell -ExecutionPolicy Unrestricted Add-WindowsFeature Web-Server; powershell -ExecutionPolicy Unrestricted Add-Content -Path \"C:\\inetpub\\wwwroot\\Default.htm\" -Value $($env:computername)"
+                },
+                "protectedSettings":{}
             }
         },
+
+
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-03-01",
