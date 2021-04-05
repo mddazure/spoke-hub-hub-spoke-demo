@@ -2,6 +2,40 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "adminUsername": {
+        "type": "string",
+        "defaultValue": "AzureAdmin",
+        "metadata": {
+        "description": "Username for the Virtual Machine."
+        }
+        },
+        "adminPassword": {
+        "type": "securestring",
+        "defaultValue": "Firewall-2021",
+        "metadata": {
+        "description": "Password for the Virtual Machine."
+         }
+        },
+        "windowsOSVersion": {
+        "type": "string",
+        "defaultValue": "2016-Datacenter",
+        "allowedValues": [
+        "2016-Datacenter",
+        "2019-Datacenter"
+        ],
+        "metadata": {
+            "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+            }
+        },
+        "vmsize":{
+        "type":"string",
+        "defaultValue": "Standard_A1_v2",
+        "allowedValues": [
+            "Standard_A1_v2",
+            "Standard_A2_v2",
+            "Standard_A4_v2"
+            ]
+        },
         "virtualMachines_Hub_1_name": {
             "defaultValue": "Hub-1",
             "type": "String"
@@ -70,8 +104,8 @@
             "defaultValue": "Spoke-4",
             "type": "String"
         },
-        "routeTables_Spoke1_to_fw_name": {
-            "defaultValue": "Spoke1-to-fw",
+        "routeTables_Spoke1_Hub1_name": {
+            "defaultValue": "Spoke1-Hub1",
             "type": "String"
         },
         "bastionHosts_Hub_1_bastion_name": {
@@ -197,40 +231,11 @@
         "publicIPAddresses_fw_Hub_2_Pip330_name": {
             "defaultValue": "fw-Hub-2_Pip330",
             "type": "String"
-        },
-        "disks_Hub_2_disk1_0a9c93d41c9a4b6ead9ec388f317981a_name": {
-            "defaultValue": "Hub-2_disk1_0a9c93d41c9a4b6ead9ec388f317981a",
-            "type": "String"
         }
     },
     "variables": {},
     "resources": [
-        {
-            "type": "Microsoft.Compute/disks",
-            "apiVersion": "2019-07-01",
-            "name": "[parameters('disks_Hub_2_disk1_0a9c93d41c9a4b6ead9ec388f317981a_name')]",
-            "location": "eastus",
-            "sku": {
-                "name": "Premium_LRS",
-                "tier": "Premium"
-            },
-            "properties": {
-                "osType": "Windows",
-                "hyperVGeneration": "V1",
-                "creationData": {
-                    "createOption": "FromImage",
-                    "imageReference": {
-                        "id": "/Subscriptions/662002fa-09ee-4980-a81b-de05dc192378/Providers/Microsoft.Compute/Locations/eastus/Publishers/microsoftwindowsserver/ArtifactTypes/VMImage/Offers/windowsserver/Skus/2016-datacenter/Versions/14393.3630.2004101604"
-                    }
-                },
-                "diskSizeGB": 127,
-                "diskIOPSReadWrite": 500,
-                "diskMBpsReadWrite": 100,
-                "encryption": {
-                    "type": "EncryptionAtRestWithPlatformKey"
-                }
-            }
-        },
+
         {
             "type": "Microsoft.Network/firewallPolicies",
             "apiVersion": "2020-03-01",
@@ -705,7 +710,7 @@
         {
             "type": "Microsoft.Network/routeTables",
             "apiVersion": "2020-03-01",
-            "name": "[parameters('routeTables_Spoke1_to_fw_name')]",
+            "name": "[parameters('routeTables_Spoke1_Hub1_name')]",
             "location": "westeurope",
             "properties": {
                 "disableBgpRoutePropagation": false,
@@ -817,36 +822,26 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_B2s"
+                    "vmSize": "[parameters('vmsize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2016-Datacenter",
-                        "version": "latest"
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "[parameters('windowsOSVersion')]",
+                    "version": "latest"
                     },
                     "osDisk": {
                         "osType": "Windows",
                         "name": "[concat(parameters('virtualMachines_Hub_1_name'), '_OsDisk_1_ce3772fbebfc4940b84882f7a95f09a5')]",
-                        "createOption": "FromImage",
-                        "caching": "ReadWrite",
-                        "managedDisk": {
-                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_Hub_1_name'), '_OsDisk_1_ce3772fbebfc4940b84882f7a95f09a5'))]"
-                        }
+                        "createOption": "FromImage"
                     },
                     "dataDisks": []
                 },
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_Hub_1_name')]",
-                    "adminUsername": "marc",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -867,36 +862,27 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_B2s"
+                    "vmSize": "[parameters('vmsize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2016-Datacenter",
-                        "version": "latest"
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "[parameters('windowsOSVersion')]",
+                    "version": "latest"
                     },
                     "osDisk": {
                         "osType": "Windows",
                         "name": "[concat(parameters('virtualMachines_Hub_2_name'), '_OsDisk_1_3e7464f111a24f2ab5c0364ba0170efe')]",
-                        "createOption": "FromImage",
-                        "caching": "ReadWrite",
-                        "managedDisk": {
-                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_Hub_2_name'), '_OsDisk_1_3e7464f111a24f2ab5c0364ba0170efe'))]"
-                        }
+                        "createOption": "FromImage"
+
                     },
                     "dataDisks": []
                 },
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_Hub_2_name')]",
-                    "adminUsername": "marc",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -917,38 +903,26 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_B1s"
+                    "vmSize": "[parameters('vmsize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2016-Datacenter",
+                        "sku": "[parameters('windowsOSVersion')]",
                         "version": "latest"
                     },
                     "osDisk": {
                         "osType": "Windows",
                         "name": "[concat(parameters('virtualMachines_Spoke_1_name'), '_OsDisk_1_c906a0fef5e243ae843041a78b7e3c58')]",
-                        "createOption": "FromImage",
-                        "caching": "ReadWrite",
-                        "managedDisk": {
-                            "storageAccountType": "Premium_LRS",
-                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_Spoke_1_name'), '_OsDisk_1_c906a0fef5e243ae843041a78b7e3c58'))]"
-                        },
-                        "diskSizeGB": 127
+                        "createOption": "FromImage"
                     },
                     "dataDisks": []
                 },
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_Spoke_1_name')]",
-                    "adminUsername": "marc",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -969,38 +943,26 @@
             ],
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_B1s"
+                    "vmSize":  "[parameters('vmsize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "MicrosoftWindowsServer",
                         "offer": "WindowsServer",
-                        "sku": "2016-Datacenter",
+                        "sku": "[parameters('windowsOSVersion')]",
                         "version": "latest"
                     },
                     "osDisk": {
                         "osType": "Windows",
                         "name": "[concat(parameters('virtualMachines_Spoke_3_name'), '_OsDisk_1_dcb5052c59704c24823ee2998a47c845')]",
-                        "createOption": "FromImage",
-                        "caching": "ReadWrite",
-                        "managedDisk": {
-                            "storageAccountType": "Premium_LRS",
-                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_Spoke_3_name'), '_OsDisk_1_dcb5052c59704c24823ee2998a47c845'))]"
-                        },
-                        "diskSizeGB": 127
+                        "createOption": "FromImage"
                     },
                     "dataDisks": []
                 },
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_Spoke_3_name')]",
-                    "adminUsername": "marc",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": [],
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -1182,9 +1144,9 @@
         {
             "type": "Microsoft.Network/routeTables/routes",
             "apiVersion": "2020-03-01",
-            "name": "[concat(parameters('routeTables_Spoke1_to_fw_name'), '/Any_to_fw')]",
+            "name": "[concat(parameters('routeTables_Spoke1_Hub1_name'), '/Any_to_fw')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_to_fw_name'))]"
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_Hub1_name'))]"
             ],
             "properties": {
                 "addressPrefix": "172.16.0.0/16",
@@ -1655,7 +1617,7 @@
             "name": "[parameters('virtualNetworks_Spoke_1_name')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_to_fw_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_Hub1_name'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Hub_1_name'))]"
             ],
             "properties": {
@@ -1670,7 +1632,7 @@
                         "properties": {
                             "addressPrefix": "172.16.101.0/25",
                             "routeTable": {
-                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_to_fw_name'))]"
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_Hub1_name'))]"
                             },
                             "delegations": [],
                             "privateEndpointNetworkPolicies": "Enabled",
@@ -1855,12 +1817,12 @@
             "name": "[concat(parameters('virtualNetworks_Spoke_1_name'), '/subnet1')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Spoke_1_name'))]",
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_to_fw_name'))]"
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_Hub1_name'))]"
             ],
             "properties": {
                 "addressPrefix": "172.16.101.0/25",
                 "routeTable": {
-                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_to_fw_name'))]"
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Spoke1_Hub1_name'))]"
                 },
                 "delegations": [],
                 "privateEndpointNetworkPolicies": "Enabled",
@@ -2395,11 +2357,6 @@
             "name": "[parameters('virtualNetworks_Hub_1_name')]",
             "location": "westeurope",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Hub1_Hub2_name'))]",
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_H1VM_H2VM_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Spoke_1_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Spoke_2_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Hub_2_name'))]"
             ],
             "properties": {
                 "addressSpace": {
@@ -2509,10 +2466,6 @@
             "name": "[parameters('virtualNetworks_Hub_2_name')]",
             "location": "eastus",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Hub2_Hub1_name'))]",
-                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_H2VM_H1VM_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Spoke_3_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Spoke_4_name'))]",
                 "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Hub_1_name'))]"
             ],
             "properties": {
